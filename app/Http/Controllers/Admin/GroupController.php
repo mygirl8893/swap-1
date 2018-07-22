@@ -44,25 +44,22 @@ class GroupController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($courseId)
     {
-        $groups = Group::whereCourseId($id)->get();
-        $groupsUsers = array();
+        $groups = Group::whereCourseId($courseId)->get();
 
-        foreach ($groups as $group ) {
-            $userIds = Group::whereCourseId($id)
-                ->whereId($group->id)
-                ->select('student_id')
-                ->get();
+        foreach ($groups as $group) {
+            $memberships = $group->memberships()->get();
 
-            $users = DB::table('students')
-                ->join('users', 'users.id', '=', 'students.user_id')
-                ->whereIn('students.id', $userIds)
-                ->get();
-
-            array_push($groupsUsers, $users);
+            $students = [];
+            foreach ($memberships as $membershipKey => $membership) {
+                $student = $membership->student()->first();
+                $student->name = $student->user()->first()->name;
+                array_push($students, $student);
+            }
+            $group->students = $students;
         }
 
-        return view('admin.groups.show', compact('groups', 'groupsUsers'));
+        return view('admin.groups.show', compact('groups'));
     }
 }
