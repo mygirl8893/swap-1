@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Judite\Models\Course;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
