@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Judite\Models\Group;
+use App\Judite\Models\Course;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Judite\Contracts\Registry\ExchangeRegistry;
-use App\Judite\Models\Course;
-use App\Judite\Models\Group;
-use App\Judite\Models\Student;
 
 class GroupController extends Controller
 {
@@ -41,7 +39,8 @@ class GroupController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($courseId)

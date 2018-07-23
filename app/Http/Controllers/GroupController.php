@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
-use App\Judite\Models\Course;
 use App\Judite\Models\Group;
+use App\Judite\Models\Course;
 use App\Judite\Models\Student;
-use App\Judite\Models\User;
 use App\Judite\Models\Invitation;
+use Illuminate\Support\Facades\Auth;
 use App\Exceptions\UserHasAlreadyGroupInCourseException;
-use Illuminate\Support\Facades\DB;
 
 class GroupController extends Controller
 {
@@ -50,11 +48,11 @@ class GroupController extends Controller
                 ->whereCourseId($course->id)
                 ->first();
 
-            if (is_null($membership))
-                $enrollment->group_status  = 0;
-            else {
+            if (is_null($membership)) {
+                $enrollment->group_status = 0;
+            } else {
                 $group = Group::whereId($membership->group_id)->first();
-                $enrollment->group_status  =
+                $enrollment->group_status =
                     $group->memberships()->count();
             }
 
@@ -75,21 +73,22 @@ class GroupController extends Controller
      * Store a newly created resource in storage.
      *
      * @param $courseId
+     *
      * @return \Illuminate\Http\Response
      */
     public function store($courseId)
     {
-        $group = new Group;
+        $group = new Group();
         $group->course_id = $courseId;
         $group->save();
 
         try {
             Auth::student()->join($group);
 
-            flash("You have successfully joined a group.")
+            flash('You have successfully joined a group.')
                 ->success();
         } catch (UserHasAlreadyGroupInCourseException $e) {
-            flash("You already have a group.")
+            flash('You already have a group.')
                 ->error();
             $group->delete();
         }
@@ -100,7 +99,8 @@ class GroupController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $courseId
+     * @param int $courseId
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($courseId)
@@ -121,7 +121,7 @@ class GroupController extends Controller
 
         $students = [];
         $group = 0;
-        if (!is_null($membership)) {
+        if (! is_null($membership)) {
             $group = $membership->group()->first();
             $memberships = $group->memberships()->get();
 
@@ -140,7 +140,8 @@ class GroupController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $inviteId
+     * @param int $inviteId
+     *
      * @return \Illuminate\Http\Response
      */
     public function update($inviteId)
@@ -154,7 +155,7 @@ class GroupController extends Controller
             ->group_max;
 
         if ($group->memberships()->count() >= $courseMax) {
-            flash("Course group limit exceeded")->error();
+            flash('Course group limit exceeded')->error();
 
             return redirect()->back();
         }
@@ -162,22 +163,25 @@ class GroupController extends Controller
         try {
             Auth::student()->join($group);
 
-            flash("You have successfully joined the group.")
+            flash('You have successfully joined the group.')
                 ->success();
 
             return redirect()->route('invitations.destroy', compact('inviteId'));
         } catch (UserHasAlreadyGroupInCourseException $e) {
-            flash("You already have a group.")
+            flash('You already have a group.')
                 ->error();
 
-            return redirect()->back();
+            $courseId = $invitation->course_id;
+
+            return redirect()->route('groups.show', compact('courseId'));
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function destroy($courseId)
@@ -188,25 +192,27 @@ class GroupController extends Controller
 
         Auth::student()->leave($group);
 
-        if (!$group->memberships()->count()) {
+        if (! ($group->memberships()->count())) {
             $invitations = Invitation::whereGroupId($group->id)->get();
 
-            foreach ($invitations as $invitation)
+            foreach ($invitations as $invitation) {
                 $invitation->delete();
+            }
 
             $group->delete();
-            flash("Group deleted.")->success();
+            flash('Group deleted.')->success();
+        } else {
+            flash('You have successfully left the group.')->success();
         }
-        else
-            flash("You have successfully left the group.")->success();
 
         return redirect()->route('groups.show', compact('courseId'));
     }
 
-    private function numberInvitations($courseId, $studentNumber) {
+    private function numberInvitations($courseId, $studentNumber)
+    {
         return Invitation::where([
             ['course_id', '=', $courseId],
-            ['student_number','=', $studentNumber],
+            ['student_number', '=', $studentNumber],
             ])
             ->count();
     }
