@@ -13,6 +13,12 @@ class GroupTest extends TestCase
 {
     use DatabaseTransactions;
 
+    public function setUp()
+    {
+        parent::setUp();
+        $this->enableGroupCreationPeriod();
+    }
+
     /** @test */
     public function a_student_can_access_courses_with_groups_list()
     {
@@ -57,16 +63,4 @@ class GroupTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewHas('groups');
     }
-
-    // /** @test */
-    // public function students_may_not_see_a_course_groups()
-    // {
-    //     $student = factory(Student::class)->create();
-    //     $course = factory(Course::class, 20)->create()->first();
-
-    //     $response = $this->actingAs($student->user)
-    //         ->get(route('students.index', $course->id));
-
-    //     $response->assertStatus(404);
-    // }
 }
