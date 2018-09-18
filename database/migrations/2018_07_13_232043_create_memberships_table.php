@@ -29,6 +29,6 @@ class CreateMembershipsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('membership');
+        Schema::dropIfExists('memberships');
     }
 }
